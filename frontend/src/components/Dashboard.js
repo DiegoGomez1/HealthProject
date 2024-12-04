@@ -1,24 +1,61 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ClinicMap from "./ClinicMap";
+// Dashboard.js
+import { authAPI, clinicsAPI } from "../services/api";
+
+// Rest of your Dashboard component code...
 
 function Dashboard() {
   const [userData, setUserData] = useState({
     email: "",
+    firstName: "",
+    lastName: "",
   });
+  const [clinics, setClinics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-    }
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch user profile
+        const userProfile = await authAPI.getProfile();
+        setUserData(userProfile);
 
-    const userEmail = localStorage.getItem("userEmail");
-    if (userEmail) {
-      setUserData({ email: userEmail });
-    }
+        // Fetch clinics
+        const clinicsData = await clinicsAPI.getClinics();
+        setClinics(clinicsData);
+      } catch (err) {
+        setError(err.message);
+        if (err.message.includes("token")) {
+          navigate("/login");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -27,13 +64,18 @@ function Dashboard() {
           {/* Welcome Section */}
           <div className="bg-white shadow rounded-lg p-6 mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Welcome to Your Dashboard
+              Welcome, {userData.firstName || "User"}
             </h1>
             <div className="bg-gray-50 p-4 rounded-lg">
               <h2 className="text-xl font-semibold text-gray-700 mb-2">
                 Your Profile
               </h2>
               <p className="text-gray-600">Email: {userData.email}</p>
+              {userData.firstName && (
+                <p className="text-gray-600">
+                  Name: {userData.firstName} {userData.lastName}
+                </p>
+              )}
             </div>
           </div>
 
@@ -43,7 +85,7 @@ function Dashboard() {
               Medical Facilities Near You
             </h2>
             <div className="bg-gray-50 rounded-lg">
-              <ClinicMap />
+              <ClinicMap clinics={clinics} />
             </div>
           </div>
 
@@ -51,63 +93,48 @@ function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg font-semibold text-blue-700">
-                Major Hospitals
+                Available Clinics
               </h3>
-              <p className="text-sm text-gray-600 mt-2">
-                Access to UF Health Shands and North Florida Regional Medical
-                Center
+              <p className="text-2xl font-bold text-blue-900">
+                {clinics.length}
               </p>
             </div>
 
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg font-semibold text-green-700">
-                Urgent Care Centers
+                Emergency Rooms
               </h3>
-              <p className="text-sm text-gray-600 mt-2">
-                Multiple locations for immediate care needs
-              </p>
+              <p className="text-2xl font-bold text-green-900">2</p>
             </div>
 
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg font-semibold text-purple-700">
-                Specialized Clinics
+                Urgent Care
               </h3>
-              <p className="text-sm text-gray-600 mt-2">
-                Various specialized medical services available
-              </p>
+              <p className="text-2xl font-bold text-purple-900">3</p>
             </div>
           </div>
 
-          {/* Activity Section */}
+          {/* List of Clinics */}
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Healthcare Resources
+              Nearby Clinics
             </h2>
             <div className="space-y-4">
-              <div className="border-b pb-4">
-                <h3 className="font-semibold text-gray-800">
-                  Emergency Services
-                </h3>
-                <p className="text-gray-600">
-                  Call 911 for medical emergencies
-                </p>
-              </div>
-              <div className="border-b pb-4">
-                <h3 className="font-semibold text-gray-800">
-                  UF Health Direct
-                </h3>
-                <p className="text-gray-600">
-                  24/7 access to healthcare providers
-                </p>
-              </div>
-              <div className="pb-4">
-                <h3 className="font-semibold text-gray-800">
-                  Telehealth Options
-                </h3>
-                <p className="text-gray-600">
-                  Virtual appointments available at most facilities
-                </p>
-              </div>
+              {clinics.map((clinic) => (
+                <div key={clinic.id} className="border-b pb-4">
+                  <h3 className="font-semibold text-gray-800">{clinic.name}</h3>
+                  <p className="text-gray-600">{clinic.address}</p>
+                  {clinic.phone && (
+                    <p className="text-gray-600">Phone: {clinic.phone}</p>
+                  )}
+                  {clinic.type && (
+                    <span className="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded mt-2">
+                      {clinic.type}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

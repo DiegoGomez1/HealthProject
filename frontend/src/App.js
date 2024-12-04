@@ -11,6 +11,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
 import Profile from "./components/Profile";
+import Symptoms from "./components/Symptoms"; // Add this line
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -43,6 +44,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/symptoms"
+            element={
+              <ProtectedRoute>
+                <Symptoms />
               </ProtectedRoute>
             }
           />

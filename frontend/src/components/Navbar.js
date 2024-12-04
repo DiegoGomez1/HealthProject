@@ -23,6 +23,9 @@ function Navbar() {
               <Link to="/dashboard" className="text-white hover:text-gray-300">
                 Dashboard
               </Link>
+              <Link to="/symptoms" className="text-white hover:text-gray-300">
+                Symptom Checker
+              </Link>
               <Link to="/profile" className="text-white hover:text-gray-300">
                 Profile
               </Link>
