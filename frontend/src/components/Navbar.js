@@ -5,6 +5,14 @@ function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+  const handleNavigation = () => {
+    if (!token) {
+      navigate("/");
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
@@ -14,9 +22,12 @@ function Navbar() {
   return (
     <nav className="bg-red-400 p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="text-white font-bold text-xl">
+        <div
+          onClick={handleNavigation}
+          className="text-white font-bold text-xl cursor-pointer"
+        >
           The Health Project
-        </Link>
+        </div>
         <div className="space-x-4">
           {token ? (
             <>
