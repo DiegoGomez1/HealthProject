@@ -1,6 +1,7 @@
-// routes/clinicRoutes.js
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
+const User = require("../models/userModel");
 
 const clinics = [
   {
@@ -47,7 +48,6 @@ const clinics = [
 ];
 
 router.get("/", (req, res) => {
-  // Optional: Filter by city if provided in query
   const { city } = req.query;
   if (city) {
     const filteredClinics = clinics.filter((clinic) =>
@@ -64,6 +64,51 @@ router.get("/:id", (req, res) => {
     return res.status(404).json({ error: "Clinic not found" });
   }
   res.json(clinic);
+});
+
+router.post("/:id/favorite", protect, async (req, res) => {
+  try {
+    const clinicId = parseInt(req.params.id);
+    const user = await User.findById(req.user.id);
+
+    if (!user.favoriteClinics) {
+      user.favoriteClinics = [];
+    }
+
+    const index = user.favoriteClinics.indexOf(clinicId);
+    if (index === -1) {
+      user.favoriteClinics.push(clinicId);
+    } else {
+      user.favoriteClinics.splice(index, 1);
+    }
+
+    await user.save();
+    console.log("Updated favorites:", user.favoriteClinics);
+    res.json({
+      favoriteClinics: user.favoriteClinics,
+      isFavorited: index === -1,
+    });
+  } catch (error) {
+    console.error("Favorite error:", error);
+    res.status(500).json({ error: "Failed to update favorites" });
+  }
+});
+
+router.get("/favorites", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user.favoriteClinics) {
+      user.favoriteClinics = [];
+      await user.save();
+    }
+    const favoriteClinics = clinics.filter((clinic) =>
+      user.favoriteClinics.includes(clinic.id)
+    );
+    res.json(favoriteClinics);
+  } catch (error) {
+    console.error("Fetch favorites error:", error);
+    res.status(500).json({ error: "Failed to fetch favorites" });
+  }
 });
 
 module.exports = router;

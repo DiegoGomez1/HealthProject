@@ -4,13 +4,10 @@ const dotenv = require("dotenv");
 const axios = require("axios");
 const crypto = require("crypto");
 
-// Load env vars - this must be first
 dotenv.config();
 
-// Create Express app
 const app = express();
 
-// Connect to MongoDB
 const mongoose = require("mongoose");
 const connectDB = async () => {
   try {
@@ -187,6 +184,11 @@ app.get("/api/issues/:issueId", async (req, res) => {
 });
 
 // Clinic routes
+
+// Add after other routes, before app.listen
+const clinicRoutes = require("./routes/clinicRoutes");
+app.use("/api/clinics", clinicRoutes);
+
 app.get("/api/clinics", (req, res) => {
   const { city } = req.query;
   if (city) {

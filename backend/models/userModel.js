@@ -37,6 +37,12 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please add a state"],
       trim: true,
     },
+    favoriteClinics: [
+      {
+        type: Number,
+        ref: "Clinic",
+      },
+    ],
   },
   {
     timestamps: true,

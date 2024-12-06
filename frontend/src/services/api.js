@@ -85,8 +85,9 @@ export const clinicsAPI = {
   },
 };
 
-// Export both APIs
-export default {
+const api = {
   authAPI,
   clinicsAPI,
 };
+
+export default api;
