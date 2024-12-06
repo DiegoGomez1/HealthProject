@@ -11,7 +11,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
 import Profile from "./components/Profile";
-import Symptoms from "./components/Symptoms"; // Add this line
+import Symptoms from "./components/Symptoms";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
